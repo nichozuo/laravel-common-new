@@ -7,9 +7,9 @@ namespace App\Modules\__ModuleName__;
 use App\Http\Controllers\Controller;
 use App\Models\__ModelName__;
 use Illuminate\Http\Request;
-use LaravelCommon\App\Exceptions\Err;
-use LaravelCommon\App\Attributes\ActionAttribute;
-use LaravelCommon\App\Attributes\ControllerAttribute;
+use LaravelCommonNew\App\Attributes\ActionAttribute;
+use LaravelCommonNew\App\Attributes\ControllerAttribute;
+use LaravelCommonNew\App\Exceptions\Err;
 
 #[ControllerAttribute('__TableComment__')]
 class __ModelName__Controller extends Controller

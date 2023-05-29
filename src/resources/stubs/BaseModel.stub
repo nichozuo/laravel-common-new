@@ -2,9 +2,10 @@
 
 namespace App\Models\Base;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use LaravelCommon\App\Traits\ModelTrait;
+use LaravelCommonNew\App\Traits\ModelTrait;
 use Illuminate\Database\Eloquent\Relations;
 use App\Models;
 

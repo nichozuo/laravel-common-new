@@ -4,7 +4,7 @@ namespace App\Enums;
 
 use LaravelCommon\App\Attributes\EnumAttribute;
 use LaravelCommon\App\Consts\Colors;
-use LaravelCommon\App\Traits\EnumTrait;
+use LaravelCommonNew\App\Traits\EnumTrait;
 
 enum __EnumName__: string
 {
