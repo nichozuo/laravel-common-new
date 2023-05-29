@@ -1,0 +1,21 @@
+{
+    "name": "nichozuo/laravel-common-new",
+    "description": "Package description here.",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "nichozuo",
+            "email": "nichozuo@qq.com"
+        }
+    ],
+    "require": {
+        "ext-json": "*",
+        "ext-pdo": "*",
+        "ext-bcmath": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Nichozuo\\LaravelCommonNew\\": "src"
+        }
+    }
+}
