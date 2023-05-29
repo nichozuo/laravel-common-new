@@ -24,7 +24,7 @@ class AttrHelper
         // Fill properties
         $className = $classRef->name;
 
-        $modules = str_replace("LaravelCommon\\", '', $className);
+        $modules = str_replace("LaravelCommonNew\\", '', $className);
         $modules = str_replace("App\\Modules\\", '', $modules);
         $modules = explode('\\', $modules);
         $className1 = last($modules);
