@@ -9,13 +9,31 @@
         }
     ],
     "require": {
+        "php": "^8.1",
         "ext-json": "*",
         "ext-pdo": "*",
-        "ext-bcmath": "*"
+        "ext-bcmath": "*",
+        "laravel/framework": "^10.12",
+        "doctrine/dbal": "^3.6",
+        "kalnoy/nestedset": "^6.0",
+        "rap2hpoutre/fast-excel": "^5.2",
+        "spatie/laravel-permission": "^5.10",
+        "vinkla/hashids": "^11.0",
+        "orangehill/iseed": "^3.0"
     },
     "autoload": {
         "psr-4": {
-            "Nichozuo\\LaravelCommonNew\\": "src"
+            "LaravelCommonNew\\": "src"
+        }
+    },
+    "require-dev": {
+        "laravel-lang/common": "^3.1"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "LaravelCommonNew\\ServiceProvider"
+            ]
         }
     }
 }

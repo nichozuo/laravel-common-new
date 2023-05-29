@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Models\Base;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use LaravelCommon\App\Traits\ModelTrait;
+use Illuminate\Database\Eloquent\Relations;
+use App\Models;
+
+/**
+__ModelProperties__
+__ModelMethods__
+ */
+class Base__ModelName__ extends Model
+{
+    use HasFactory, ModelTrait;
+
+    __TableString__
+    __TableCommentString__
+    __TableFillableString__
+
+    # region relations
+__ModelRelations__
+    # endregion
+}

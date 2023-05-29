@@ -1,0 +1,1 @@
+(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([[2],{QeBL:function(e,n,t){"use strict";t.r(n);var s=t("q1tI"),u=t("9kvl"),c=t("nKUr");n["default"]=function(){return Object(s["useEffect"])((()=>{u["a"].push("/modules")})),Object(c["jsx"])(c["Fragment"],{})}}}]);
