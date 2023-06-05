@@ -3,6 +3,9 @@
 namespace LaravelCommonNew\App\Traits;
 
 
+/**
+ * @method static cases()
+ */
 trait EnumTrait
 {
     /**
@@ -35,5 +38,19 @@ trait EnumTrait
             ];
         }
         return $data;
+    }
+
+    /**
+     * @return int
+     */
+    public static function GetMaxLength(): int
+    {
+        $max = 0;
+        foreach (self::cases() as $item) {
+            if ($max < strlen($item->value)) {
+                $max = strlen($item->value);
+            }
+        }
+        return $max;
     }
 }
