@@ -55,6 +55,8 @@ class ExceptionRender
                 $status = 404;
                 break;
             case ValidationException::class:
+                $keys = implode(",", array_keys($e->errors()));
+                $message = "您提交的信息不完整：请查看【{$keys}】字段";
                 $status = 400;
                 break;
             case Err::class:

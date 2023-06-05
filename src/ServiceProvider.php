@@ -12,6 +12,9 @@ use LaravelCommonNew\App\Console\Commands\RenameMigrationFilesCommand;
 use LaravelCommonNew\App\Console\Commands\UpdateModelsCommand;
 use LaravelCommonNew\App\Helpers\DBHelper;
 
+/**
+ * @method addColumn(string $string, string $column, array $compact)
+ */
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
     public function register()
@@ -28,17 +31,10 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         ]);
 
         // blueprint macros
-        Blueprint::macro('amount', function (?string $fieldName = 'amount', string $comment = '', int $default = 0, bool $nullable = false) {
-            $this->decimal($fieldName, 30, 6)->comment($comment)->default($default)->nullable($nullable);
-        });
-        Blueprint::macro('address', function (?string $fieldName = 'address', string $comment = '', string $default = null, bool $nullable = false) {
-            $this->string($fieldName, 92)->comment($comment)->default($default)->nullable($nullable);
-        });
-        Blueprint::macro('float8', function (string $fieldName, string $comment = '', int $default = 0, bool $nullable = false) {
-            $this->double($fieldName, 20, 6)->comment($comment)->default($default)->nullable($nullable);
-        });
-        Blueprint::macro('myEnum', function (string $fieldName, mixed $enum, string $comment = '', string $default = null, bool $nullable = false) {
-            $this->enum($fieldName, $enum::columns())->comment($enum::comment($comment))->default($default)->nullable($nullable);
+        Blueprint::macro('xEnum', function (string $column, mixed $enumClass, string $comment) {
+            $length = $enumClass::GetMaxLength();
+            $allowed = $enumClass::columns();
+            return $this->addColumn('enum', $column, compact('length', 'allowed'))->comment($enumClass::comment($comment));
         });
     }
 
@@ -48,7 +44,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
 
         $this->publishes([
             __DIR__ . '/resources/dist' => public_path('docs'),
-            __DIR__ . '/config/common.php' => config_path(),
+            __DIR__ . '/config/common.php' => config_path("common.php"),
         ]);
 
         $this->loadRoutesFrom(__DIR__ . '/routes/api.php');

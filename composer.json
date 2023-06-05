@@ -26,9 +26,6 @@
             "LaravelCommonNew\\": "src"
         }
     },
-    "require-dev": {
-        "laravel-lang/common": "^3.1"
-    },
     "extra": {
         "laravel": {
             "providers": [
