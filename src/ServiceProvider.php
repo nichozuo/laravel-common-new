@@ -3,14 +3,11 @@
 namespace LaravelCommonNew;
 
 use Illuminate\Database\Schema\Blueprint;
-use LaravelCommonNew\App\Console\Commands\DbBackupCommand;
-use LaravelCommonNew\App\Console\Commands\DbCacheCommand;
-use LaravelCommonNew\App\Console\Commands\DumpTableCommand;
-use LaravelCommonNew\App\Console\Commands\GenEnumsToJSCommand;
-use LaravelCommonNew\App\Console\Commands\GenFilesCommand;
-use LaravelCommonNew\App\Console\Commands\RenameMigrationFilesCommand;
-use LaravelCommonNew\App\Console\Commands\UpdateModelsCommand;
-use LaravelCommonNew\App\Helpers\DBHelper;
+use LaravelCommonNew\App\Commands\DbBackupCommand;
+use LaravelCommonNew\App\Commands\DumpTableCommand;
+use LaravelCommonNew\DBTools\DBCacheCommand;
+use LaravelCommonNew\RouterTools\RouterCacheCommand;
+
 
 /**
  * @method addColumn(string $string, string $column, array $compact)
@@ -21,13 +18,10 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     {
         // commands
         $this->commands([
+            DBCacheCommand::class,
+            RouterCacheCommand::class,
             DbBackupCommand::class,
-            DbCacheCommand::class,
             DumpTableCommand::class,
-            GenEnumsToJSCommand::class,
-            GenFilesCommand::class,
-            RenameMigrationFilesCommand::class,
-            UpdateModelsCommand::class
         ]);
 
         // blueprint macros
@@ -44,13 +38,13 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
 
     public function boot()
     {
-        DBHelper::Schema();
+//        DBHelper::Schema();
 
-        $this->publishes([
-            __DIR__ . '/resources/dist' => public_path('docs'),
-            __DIR__ . '/config/common.php' => config_path("common.php"),
-        ]);
+//        $this->publishes([
+//            __DIR__ . '/resources/dist' => public_path('docs'),
+//            __DIR__ . '/config/common.php' => config_path("common.php"),
+//        ]);
 
-        $this->loadRoutesFrom(__DIR__ . '/routes/api.php');
+//        $this->loadRoutesFrom(__DIR__ . '/routes/api.php');
     }
 }
