@@ -5,7 +5,7 @@ namespace LaravelCommonNew\App\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
-class DbBackupCommand extends Command
+class DBBackupCommand extends Command
 {
     protected $signature = 'db:backup';
     protected $description = 'iseed backup command';

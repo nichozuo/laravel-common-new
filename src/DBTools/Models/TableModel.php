@@ -48,11 +48,14 @@ class TableModel
 
 
         foreach ($this->columns as $column) {
+            if (in_array($column->name, ['id', 'created_at', 'updated_at', 'deleted_at']))
+                continue;
+
             // validateString
             $this->validateString[] = "'$column->name' => '$column->nullableString|$column->typeString', # $column->comment";
 
             // insertString
-            $this->insertString[] = "";
+            $this->insertString[] = "'$column->name' => '', # $column->comment";
         }
     }
 

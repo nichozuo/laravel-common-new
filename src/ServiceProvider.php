@@ -3,8 +3,8 @@
 namespace LaravelCommonNew;
 
 use Illuminate\Database\Schema\Blueprint;
-use LaravelCommonNew\App\Commands\DbBackupCommand;
-use LaravelCommonNew\App\Commands\DumpTableCommand;
+use LaravelCommonNew\App\Commands\DBBackupCommand;
+use LaravelCommonNew\App\Commands\DDCommand;
 use LaravelCommonNew\DBTools\DBCacheCommand;
 use LaravelCommonNew\RouterTools\RouterCacheCommand;
 
@@ -20,8 +20,8 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->commands([
             DBCacheCommand::class,
             RouterCacheCommand::class,
-            DbBackupCommand::class,
-            DumpTableCommand::class,
+            DBBackupCommand::class,
+            DDCommand::class,
         ]);
 
         // blueprint macros
