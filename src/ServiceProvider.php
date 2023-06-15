@@ -37,7 +37,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
             return $this->addColumn('enum', $column, compact('length', 'allowed'))->comment($enumClass::comment($comment));
         });
 
-        Blueprint::macro('xPercent', function (string $column, $total = 3, $places = 2, $unsigned = false) {
+        Blueprint::macro('xPercent', function (string $column, $total = 5, $places = 2, $unsigned = false) {
             return $this->addColumn('float', $column, compact('total', 'places', 'unsigned'));
         });
 
