@@ -15,7 +15,7 @@ class Constants
 //        'double' => 'float',
 //        'decimal' => 'float',
 //        'date' => 'date',
-        'datetime' => 'Carbon',
+        'datetime' => 'date',
 //        'timestamp' => 'timestamp',
 //        'time' => 'time',
 //        'year' => 'year',

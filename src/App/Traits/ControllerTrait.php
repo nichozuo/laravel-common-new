@@ -4,7 +4,7 @@
 namespace LaravelCommonNew\App\Traits;
 
 
-use LaravelCommonNew\App\Exceptions\Err;
+use Exception;
 
 trait ControllerTrait
 {
@@ -24,7 +24,7 @@ trait ControllerTrait
     /**
      * @intro 获得分页size
      * @return int
-     * @throws Err
+     * @throws Exception
      */
     protected function perPage(): int
     {
@@ -34,7 +34,7 @@ trait ControllerTrait
 
         $allow = config('common.perPageAllow', [10, 20, 50, 100]);
         if (!in_array($params['perPage'], $allow))
-            Err::Throw('[perPage] is not in the range');
+            throw new Exception('[perPage] is not in the range');
 
         return (int)$params['perPage'];
     }

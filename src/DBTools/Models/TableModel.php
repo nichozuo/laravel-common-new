@@ -10,6 +10,7 @@ class TableModel
     public string $name;
     public string $comment;
     public array $columns = [];
+    public bool $hasSoftDeletes = false;
 
     public string $modelName; // 模型名称
     public array $properties = []; // BaseModel文件中的property注释
@@ -19,6 +20,8 @@ class TableModel
     public array $foreignKeys = []; // 外键
     public array $belongsTo = []; // 关系
     public array $hasMany = []; // 关系
+    public string $relationsStr = ''; // 关系
+    public bool $hasRelations = false;
 
     public array $validateString = []; // 验证字符串
     public array $insertString = []; // 插入符串
@@ -53,6 +56,11 @@ class TableModel
 
             // insertString
             $this->insertString[] = "";
+
+            // softDeletes
+            if($column->name === 'deleted_at') {
+                $this->hasSoftDeletes = true;
+            }
         }
     }
 

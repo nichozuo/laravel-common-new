@@ -5,18 +5,19 @@ namespace LaravelCommonNew\DBTools;
 use Doctrine\DBAL\Exception;
 use Illuminate\Console\Command;
 
-class DBCacheCommand extends Command
+class DBCCommand extends Command
 {
     protected $signature = 'dbc';
     protected $description = 'Cache DBModel to disk';
 
     /**
-     * @return void
+     * @return int
      * @throws Exception
      */
-    public function handle(): void
+    public function handle(): int
     {
-        DBToolsServices::CacheIt();
+        DBToolsServices::CacheAll();
         $this->line('db cached...');
+        return 0;
     }
 }

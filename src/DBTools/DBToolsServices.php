@@ -16,20 +16,28 @@ use LaravelCommonNew\DBTools\Models\TableModel;
 class DBToolsServices
 {
     /**
-     * @return DBModel
+     * @param string $tableName
+     * @return TableModel
+     * @throws \Exception
      */
-    public static function Remember(): DBModel
+    public static function GetTable(string $tableName): TableModel
     {
-        return Cache::store('file')->rememberForever('DBModel', function () {
+        $tables = Cache::store('file')->rememberForever('DBModel', function () {
             return self::Gen();
         });
+
+        $table = $tables->tables[$tableName] ?? null;
+        if (!$table)
+            throw new \Exception("table $tableName not found");
+
+        return $table;
     }
 
     /**
      * @return void
      * @throws Exception
      */
-    public static function CacheIt(): void
+    public static function CacheAll(): void
     {
         Cache::store('file')->put('DBModel', self::Gen());
     }
@@ -72,6 +80,11 @@ class DBToolsServices
             // belongsTO
             $tableModel->belongsTo = self::parseBelongsTo($tableModel);
             // belongsToMany
+
+            $tableModel->relationsStr = self::parseRelationsStr($tableModel);
+
+            if (count($tableModel->hasMany) || count($tableModel->belongsTo))
+                $tableModel->hasRelations = true;
         }
         return $dbModel;
     }
@@ -170,5 +183,32 @@ class DBToolsServices
             ];
         }
         return $belongsTo;
+    }
+
+    /**
+     * @param TableModel $tableModel
+     * @return string
+     */
+    private static function parseRelationsStr(TableModel $tableModel): string
+    {
+        $str = "# relations" . PHP_EOL;
+
+        // hasMany
+        foreach ($tableModel->hasMany as $key => $value) {
+            $str .= "    public function $key(): Relations\HasMany
+    {
+        return \$this->hasMany(Models\\{$value['related']}::class, '{$value['foreignKey']}', '{$value['localKey']}');
+    }" . PHP_EOL . PHP_EOL;
+        }
+
+        // belongsTo
+        foreach ($tableModel->belongsTo as $key => $value) {
+            $str .= "    public function $key(): Relations\BelongsTo
+    {
+        return \$this->belongsTo(Models\\{$value['related']}::class, '{$value['foreignKey']}', '{$value['ownerKey']}');
+    }" . PHP_EOL . PHP_EOL;
+        }
+
+        return $str;
     }
 }

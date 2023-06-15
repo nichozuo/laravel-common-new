@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Models\Base;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use LaravelCommonNew\App\Traits\ModelTrait;
+{$useSoftDeletes}{$useRelations}
+/**
+{$properties}
+{$methods}
+ */
+class Base{$modelName} extends Base
+{
+    use HasFactory, ModelTrait{$useSoftDeletesTrait};
+
+    protected $table = '{$name}';
+    protected string $comment = '{$comment}';
+    protected $fillable = [{$fillable}];
+
+    {$relations}
+}

@@ -1,0 +1,74 @@
+<?php
+
+
+namespace App\Modules\{$moduleName};
+
+
+use App\Http\Controllers\Controller;
+use App\Models\{$modelName};
+use Illuminate\Http\Request;
+use Exception;
+
+/**
+ * {$comment}
+ */
+class {$modelName}Controller extends Controller
+{
+    /**
+     * 列表
+     * @param Request $request
+     * @return mixed
+     * @throws Exception
+    */
+    public function list(Request $request): mixed
+    {
+        $params = $request->validate([
+            'name' => 'nullable|string', # 模糊搜索：名称
+        ]);
+        return {$modelName}::ifWhereLike($params, 'name')
+            ->order()
+            ->paginate($this->perPage());
+    }
+
+    /**
+     * 添加
+     * @param Request $request
+     * @return void
+     */
+    public function store(Request $request): void
+    {
+        $params = $request->validate([
+            {$validateString}
+        ]);
+        {$modelName}::unique($params, ['name'], '名称');
+        {$modelName}::create($params);
+    }
+
+    /**
+     * 修改
+     * @param Request $request
+     * @return void
+     */
+    public function update(Request $request): void
+    {
+        $params = $request->validate([
+            'id' => 'required|integer', # id
+            {$validateString}
+        ]);
+        {$modelName}::unique($params, ['name'], '名称');
+        {$modelName}::idp($params)->update($params);
+    }
+
+    /**
+     * 删除
+     * @param Request $request
+     * @return void
+     */
+    public function delete(Request $request): void
+    {
+        $params = $request->validate([
+            'id' => 'required|integer', # id
+        ]);
+        {$modelName}::idp($params)->delete();
+    }
+}

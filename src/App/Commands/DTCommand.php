@@ -2,28 +2,22 @@
 
 namespace LaravelCommonNew\App\Commands;
 
-use Doctrine\DBAL\Exception;
 use Illuminate\Console\Command;
 use LaravelCommonNew\DBTools\DBToolsServices;
 
-class DumpTableCommand extends Command
+class DTCommand extends Command
 {
-    protected $signature = 'dd {table}';
+    protected $signature = 'dt {table}';
     protected $description = 'dump the fields of the table';
 
     /**
      * @return void
-     * @throws Exception
      */
     public function handle(): void
     {
         $tableName = $this->argument('table');
 
-        $table = DBToolsServices::Remember()->tables[$tableName];
-        if (!$table) {
-            $this->error("table $tableName not found");
-            return;
-        }
+        $table = DBToolsServices::GetTable($tableName);
 
         $this->warn('Gen Table template');
         $this->line("protected \$table = '$table->name';");
