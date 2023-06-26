@@ -4,7 +4,10 @@ namespace LaravelCommonNew\GenTools\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use LaravelCommonNew\Utils\DocBlockReader;
 use ReflectionClass;
+use ReflectionClassConstant;
+use ReflectionEnum;
 use ReflectionException;
 
 class GenAllEnumsCommand extends Command
@@ -22,7 +25,6 @@ class GenAllEnumsCommand extends Command
         foreach (File::files(app_path("Enums")) as $item) {
             $fileName = str_replace('.php', '', $item->getFilename());
             $enum = new ReflectionClass('\\App\\Enums\\' . $fileName);
-            $title = $this->parseTitle($enum->getDocComment());
             $this->genContent($enum, $str);
         }
         File::put('enums.ts', $str);
@@ -30,36 +32,40 @@ class GenAllEnumsCommand extends Command
     }
 
     /**
-     * @param bool|string $comment
-     * @return mixed
+     * @param ReflectionClass $enum
+     * @param string $str
+     * @return void
      */
-    private  function parseTitle(bool|string $comment): mixed
+    private function genContent(ReflectionClass $enum, string &$str): void
     {
-        $title = '';
-        if (preg_match('/\/\*\*\s*\n\s*\*\s*(.*?)\s*\n/', $comment, $matches)) {
-            $title = $matches[1];
+        $enumDocComment = DocBlockReader::parse($enum->getDocComment());
+        $fileName = last(explode('\\', $enum->getName()));
+        $enumTitle = $enumDocComment['intro'] ?? $fileName;
+        $arr = [];
+        foreach ($enum->getConstants() as $constant) {
+            $docComment = DocBlockReader::parse($enum->getReflectionConstant($constant->name)->getDocComment());
+            $label = $docComment['label'] ?? $constant->name;
+            $value = $docComment['value'] ?? $constant->value;
+            $color = $docComment['value'] ?? $this->getRandomColor();
+            $arr[] = [
+                'label' => $label,
+                'value' => $value,
+                'color' => $color,
+            ];
         }
-        return $title;
+        $str .= '// ' . $enumTitle . PHP_EOL;
+        $str .= "export const $fileName =" . json_encode($arr, JSON_UNESCAPED_UNICODE) . PHP_EOL;
     }
 
-    private function genContent(ReflectionClass $enum, string &$str)
+    /**
+     * @return string
+     */
+    private function getRandomColor(): string
     {
-        $fileName = last(explode('\\', $enum->getName()));
-        $arr = [];
-        foreach ($enum->getConstants() as $case) {
-            $const = $case->get($case);
-            dd($const->getDocComment());
-            $attr = AttrHelper::GetEnumAttr($case);
-            if ($attr) {
-                $color = ($attr->color) ?: $this->getRandomColor();
-                $arr[] = ['label' => $attr->label, 'value' => $attr->value, 'color' => $color];
-            } else {
-                $value = $case->getValue()->value;
-                $color = $this->getRandomColor();
-                $arr[] = ['label' => $value, 'value' => $value, 'color' => $color];
-            }
+        $str = '#';
+        for ($i = 0; $i < 6; $i++) {
+            $str .= dechex(rand(0, 15));
         }
-        $str .= $enum->getDocComment() . PHP_EOL;
-        $str .= "export const $fileName =" . json_encode($arr, JSON_UNESCAPED_UNICODE) . PHP_EOL;
+        return $str;
     }
 }

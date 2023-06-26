@@ -15,7 +15,7 @@ class DBBackupCommand extends Command
      */
     public function handle(): int
     {
-        $list = config('common.iSeedBackupList', []);
+        $list = config('common.dbBackupList', []);
         foreach ($list as $item) {
             $this->line("backup:::$item");
             Artisan::call("iseed $item --force");

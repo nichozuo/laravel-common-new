@@ -16,11 +16,20 @@ use LaravelCommonNew\DBTools\Models\TableModel;
 class DBToolsServices
 {
     /**
+     * @return void
+     * @throws Exception
+     */
+    public static function CacheAll(): void
+    {
+        Cache::store('file')->put('_dev_DBModel', self::Gen());
+    }
+
+    /**
      * @return DBModel
      */
     public static function GetTables(): DBModel
     {
-        return Cache::store('file')->rememberForever('DBModel', function () {
+        return Cache::store('file')->rememberForever('_dev_DBModel', function () {
             return self::Gen();
         });
     }
@@ -32,7 +41,7 @@ class DBToolsServices
      */
     public static function GetTable(string $tableName): TableModel
     {
-        $tables = Cache::store('file')->rememberForever('DBModel', function () {
+        $tables = Cache::store('file')->rememberForever('_dev_DBModel', function () {
             return self::Gen();
         });
 
@@ -41,15 +50,6 @@ class DBToolsServices
             throw new \Exception("table $tableName not found");
 
         return $table;
-    }
-
-    /**
-     * @return void
-     * @throws Exception
-     */
-    public static function CacheAll(): void
-    {
-        Cache::store('file')->put('DBModel', self::Gen());
     }
 
     /**
