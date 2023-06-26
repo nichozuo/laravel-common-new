@@ -27,8 +27,7 @@ class DBDumpCommand extends Command
         $this->line("protected \$fillable = [$table->fillableString];");
 
         $this->warn('gen Validate template');
-        $validateString = implode(PHP_EOL, $table->validateString);
-        $this->line($validateString);
+        $this->line(implode(PHP_EOL, $table->validateString));
 
         $this->warn('gen Insert template');
         $insertString = implode(PHP_EOL, $table->insertString);
