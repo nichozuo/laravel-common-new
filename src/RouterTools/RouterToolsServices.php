@@ -2,16 +2,15 @@
 
 namespace LaravelCommonNew\RouterTools;
 
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
+use LaravelCommonNew\App\Middleware\JsonWrapperMiddleware;
 use LaravelCommonNew\RouterTools\Models\ControllerModel;
 use LaravelCommonNew\RouterTools\Models\MethodModel;
-use PhpDocReader\PhpDocReader;
+use LaravelCommonNew\Utils\DocBlockReader;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
-use ReflectionParameter;
 use Symfony\Component\Finder\SplFileInfo;
 
 class RouterToolsServices
@@ -19,6 +18,7 @@ class RouterToolsServices
     /**
      * @param $router
      * @return void
+     * @throws ReflectionException
      */
     public static function AutoGenRouters($router): void
     {
@@ -28,32 +28,62 @@ class RouterToolsServices
             $modulesName = str_replace($appPath . DIRECTORY_SEPARATOR . 'Modules' . DIRECTORY_SEPARATOR, '', $file->getPath());
             $controllerName = str_replace('.php', '', $file->getFilename());
             $className = str_replace(DIRECTORY_SEPARATOR, '\\', "App\\Modules\\$modulesName\\$controllerName");
-            self::parseController($router, $className);
+            $prefix = self::getPrefix($modulesName);
+            self::parseController($router, $prefix, $className);
         }
     }
 
     /**
      * @param $router
+     * @param array $prefix
      * @param string $className
      * @return void
      * @throws ReflectionException
      */
-    private static function parseController($router, string $className): void
+    private static function parseController($router, array $prefix, string $className): void
     {
-        $controllerRef = new ReflectionClass($className);
-        $reader = new PhpDocReader();
-        $parameter = new ReflectionParameter([$className, 'list']);
-        dd($parameter);
+        $classRef = new ReflectionClass($className);
+//        $classDocComment = DocBlockReader::parse($classRef->getDocComment());
 
-        $cAttr = AttrHelper::GetControllerAttr($controllerRef);
-        if ($cAttr->auth == 1)
-            $router = $router->middleware(['auth:sanctum']);
-        $router->prefix($cAttr->routePrefix)->name($cAttr->routeName . ".")->group(function ($router1) use ($classRef, $className) {
+        $controllerName = Str::snake(str_replace('Controller', '', $classRef->getShortName()));
+        $prefix[] = $controllerName;
+        $router->prefix(implode('/', $prefix))->name(implode('.', $prefix) . '.')->group(function ($router1) use ($classRef, $className) {
             foreach ($classRef->getMethods() as $method) {
+                // 过滤方法
                 if ($method->class != $className || $method->getModifiers() !== 1 || $method->isConstructor())
                     continue;
-                $attr = AttrHelper::GetActionAttr($method);
-                $router1->match($attr->methods, $attr->uri, "$method->class@$method->name")->name($attr->uri);
+
+                $methodDocComment = DocBlockReader::parse($method->getDocComment());
+
+                // 是否忽略在路由中
+                if (isset($methodDocComment['skipRouter']))
+                    continue;
+
+                $middlewares = [];
+
+                // 是否忽略授权
+                if (!isset($methodDocComment['skipAuth'])) {
+                    $middlewares[] = 'auth:sanctum';
+                }
+
+                // 是否忽略WrapJson
+                if (!isset($methodDocComment['skipWrap'])) {
+                    $middlewares[] = JsonWrapperMiddleware::class;
+                }
+
+                // method
+                if (isset($methodDocComment['method'])) {
+                    $methodName = explode('|', $methodDocComment['method']);
+                } else {
+                    $methodName = ['POST','GET'];
+                }
+
+                // uri
+                $uri = Str::snake($method->name);
+
+                // action
+                $action = "$method->class@$method->name";
+                $router1->match($methodName, $uri, $action)->middleware($middlewares)->name($uri);
             }
         });
     }
@@ -194,5 +224,19 @@ class RouterToolsServices
         }
 
         return $params;
+    }
+
+    /**
+     * @param string $className
+     * @return array
+     */
+    private static function getPrefix(string $className): array
+    {
+        $arr = explode(DIRECTORY_SEPARATOR, $className);
+        $result = [];
+        foreach ($arr as $item) {
+            $result[] = Str::snake($item);
+        }
+        return $result;
     }
 }

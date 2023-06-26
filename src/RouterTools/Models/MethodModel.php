@@ -9,5 +9,7 @@ class MethodModel
     public ?string $intro;
     public string $method = 'POST';
     public bool $auth = true;
+    public string $uri;
+    public string $fullUri;
     public array $params = [];
 }

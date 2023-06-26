@@ -11,6 +11,19 @@ use ReflectionProperty;
 
 class DocBlockReader
 {
+    /**
+     * @param $docblock
+     * @return array
+     */
+    public static function parse($docblock): array
+    {
+        $result = [];
+        if (preg_match_all('/@(\w+)\s+(.*)\r?\n/m', $docblock, $matches)) {
+            $result = array_combine($matches[1], $matches[2]);
+        }
+        return $result;
+    }
+
     private string|false $rawDocBlock;
     private array $parameters;
     private string $keyPattern = "[A-z\d\-]+";
@@ -39,7 +52,7 @@ class DocBlockReader
                 $reflection = new ReflectionMethod($arguments[0], $arguments[1]);
             } else if ($type === "property") {
                 $reflection = new ReflectionProperty($arguments[0], $arguments[1]);
-            } else if($type === "constant") {
+            } else if ($type === "constant") {
                 $reflection = new ReflectionClassConstant($arguments[0], $arguments[1]);
             } else {
                 $reflection = null;
@@ -87,7 +100,7 @@ class DocBlockReader
     /**
      * @return void
      */
-    private function parse(): void
+    private function parse1(): void
     {
         $pattern = "/@(?=(.*)" . $this->endPattern . ")/U";
 
