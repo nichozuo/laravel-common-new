@@ -9,6 +9,9 @@ class TableModel
 {
     public string $name;
     public string $comment;
+    /**
+     * @var ColumnModel[]
+     */
     public array $columns = [];
     public bool $hasSoftDeletes = false;
 
@@ -51,14 +54,21 @@ class TableModel
 
 
         foreach ($this->columns as $column) {
+            if ($column->isPrimaryKey)
+                continue;
+
+            $inArray = in_array($column->name, ['id', 'created_at', 'updated_at', 'deleted_at']);
+
             // validateString
-            $this->validateString[] = "'$column->name' => '$column->nullableString|$column->typeString', # $column->comment";
+            if(!$inArray)
+                $this->validateString[] = "'$column->name' => '$column->nullableString|$column->typeString', # $column->comment";
 
             // insertString
-            $this->insertString[] = "";
+            if(!$inArray)
+                $this->insertString[] = "'$column->name' => '', # $column->comment";
 
             // softDeletes
-            if($column->name === 'deleted_at') {
+            if ($column->name === 'deleted_at') {
                 $this->hasSoftDeletes = true;
             }
         }

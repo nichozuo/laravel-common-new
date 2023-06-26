@@ -1,19 +1,21 @@
 <?php
 
-namespace LaravelCommonNew\App\Commands;
+namespace LaravelCommonNew\DBTools\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use LaravelCommonNew\DBTools\DBToolsServices;
 
-class DTCommand extends Command
+class DBDumpCommand extends Command
 {
     protected $signature = 'dt {table}';
     protected $description = 'dump the fields of the table';
 
     /**
-     * @return void
+     * @return int
+     * @throws Exception
      */
-    public function handle(): void
+    public function handle(): int
     {
         $tableName = $this->argument('table');
 
@@ -29,6 +31,9 @@ class DTCommand extends Command
         $this->line($validateString);
 
         $this->warn('gen Insert template');
-//        $this->line(GenHelper::GenColumnsInsertString($columns));
+        $insertString = implode(PHP_EOL, $table->insertString);
+        $this->line($insertString);
+
+        return 0;
     }
 }

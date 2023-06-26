@@ -21,14 +21,12 @@ class GenFilesServices
     {
         $table = DBToolsServices::GetTable($tableName);
 
-        $content = self::loadStub("BaseModel");
+        // 生成BaseModel
+        $content = self::loadStub($table->hasSoftDeletes ? "BaseModelSoftDelete" : "BaseModel");
         $content = self::replaceAll([
-            'useSoftDeletes' => $table->hasSoftDeletes ? 'use Illuminate\Database\Eloquent\SoftDeletes;' . PHP_EOL : '',
-            'useRelations' => $table->hasRelations ? 'use Illuminate\Database\Eloquent\Relations;' . PHP_EOL . 'use App\Models;' . PHP_EOL : '',
             'properties' => implode(PHP_EOL, $table->properties),
             'methods' => '',
             'modelName' => $table->modelName,
-            'useSoftDeletesTrait' => $table->hasSoftDeletes ? ', SoftDeletes' : '',
             'name' => $table->name,
             'comment' => $table->comment,
             'fillable' => implode(', ', $table->fillable),
@@ -36,6 +34,7 @@ class GenFilesServices
         ], $content);
         self::saveFile(app_path("Models/Base/Base$table->modelName.php"), $content, $force);
 
+        // 生成Model
         $content = self::loadStub("Model");
         $content = self::replaceAll([
             'modelName' => $table->modelName,
@@ -54,9 +53,8 @@ class GenFilesServices
     {
         $table = DBToolsServices::GetTable($tableName);
 
-        $content = self::loadStub("Controller");
+        $content = self::loadStub($table->hasSoftDeletes ? "ControllerSoftDelete" : "Controller");
         $content = self::replaceAll([
-//            'useSoftDeletes' => $table->hasSoftDeletes ? 'use Illuminate\Database\Eloquent\SoftDeletes;' . PHP_EOL : '',
             'moduleName' => implode('\\', $moduleName),
             'modelName' => $table->modelName,
             'comment' => $table->comment,
@@ -64,6 +62,20 @@ class GenFilesServices
         ], $content);
         $moduleName = implode('/', $moduleName);
         self::saveFile(app_path("Modules/$moduleName/{$table->modelName}Controller.php"), $content, $force);
+    }
+
+    /**
+     * @param string $key
+     * @param mixed $force
+     * @return void
+     */
+    public static function GenEnum(string $key, mixed $force): void
+    {
+        $content = self::loadStub("Enum");
+        $content = self::replaceAll([
+            'EnumName' => $key,
+        ], $content);
+        self::saveFile(app_path("Enums/$key.php"), $content, $force);
     }
 
     /**

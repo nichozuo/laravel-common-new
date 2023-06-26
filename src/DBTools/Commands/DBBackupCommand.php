@@ -1,24 +1,25 @@
 <?php
 
-namespace LaravelCommonNew\App\Commands;
+namespace LaravelCommonNew\DBTools\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
-class DbBackupCommand extends Command
+class DBBackupCommand extends Command
 {
-    protected $signature = 'db:backup';
+    protected $signature = 'dbb';
     protected $description = 'iseed backup command';
 
     /**
-     * @return void
+     * @return int
      */
-    public function handle(): void
+    public function handle(): int
     {
         $list = config('common.iSeedBackupList', []);
         foreach ($list as $item) {
             $this->line("backup:::$item");
             Artisan::call("iseed $item --force");
         }
+        return 0;
     }
 }

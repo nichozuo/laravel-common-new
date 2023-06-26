@@ -1,22 +1,22 @@
 <?php
 
-namespace LaravelCommonNew\RouterTools;
+namespace LaravelCommonNew\RouterTools\Commands;
 
 use Illuminate\Console\Command;
+use LaravelCommonNew\RouterTools\RouterToolsServices;
 use ReflectionException;
 
-class RTCCommand extends Command
+class RouterCacheCommand extends Command
 {
     protected $signature = 'rtc';
     protected $description = 'Cache DBModel to disk';
 
     /**
      * @return int
-     * @throws ReflectionException
      */
     public function handle(): int
     {
-        RouterToolsServices::Gen();
+        RouterToolsServices::AutoGenRouters(null);
         $this->line('router cached...');
         return 0;
     }

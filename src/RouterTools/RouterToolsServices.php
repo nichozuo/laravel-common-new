@@ -7,35 +7,55 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 use LaravelCommonNew\RouterTools\Models\ControllerModel;
 use LaravelCommonNew\RouterTools\Models\MethodModel;
+use PhpDocReader\PhpDocReader;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionMethod;
+use ReflectionParameter;
 use Symfony\Component\Finder\SplFileInfo;
 
 class RouterToolsServices
 {
-
     /**
-     * @return mixed
+     * @param $router
+     * @return void
      */
-    public static function Remember(): mixed
+    public static function AutoGenRouters($router): void
     {
-        return Cache::store('file')->rememberForever('DBModel', function () {
-            return self::Gen();
-        });
+        $appPath = app_path();
+        $files = File::allFiles(app_path('Modules'));
+        foreach ($files as $file) {
+            $modulesName = str_replace($appPath . DIRECTORY_SEPARATOR . 'Modules' . DIRECTORY_SEPARATOR, '', $file->getPath());
+            $controllerName = str_replace('.php', '', $file->getFilename());
+            $className = str_replace(DIRECTORY_SEPARATOR, '\\', "App\\Modules\\$modulesName\\$controllerName");
+            self::parseController($router, $className);
+        }
     }
 
     /**
+     * @param $router
+     * @param string $className
      * @return void
      * @throws ReflectionException
      */
-    public static function Gen(): void
+    private static function parseController($router, string $className): void
     {
-        $appPath = app_path();
-        foreach (File::allFiles(app_path('Modules')) as $file) {
-            dump($file->getPath());
-            $controllerModel = self::parseControllerModel($file, $appPath);
-        }
+        $controllerRef = new ReflectionClass($className);
+        $reader = new PhpDocReader();
+        $parameter = new ReflectionParameter([$className, 'list']);
+        dd($parameter);
+
+        $cAttr = AttrHelper::GetControllerAttr($controllerRef);
+        if ($cAttr->auth == 1)
+            $router = $router->middleware(['auth:sanctum']);
+        $router->prefix($cAttr->routePrefix)->name($cAttr->routeName . ".")->group(function ($router1) use ($classRef, $className) {
+            foreach ($classRef->getMethods() as $method) {
+                if ($method->class != $className || $method->getModifiers() !== 1 || $method->isConstructor())
+                    continue;
+                $attr = AttrHelper::GetActionAttr($method);
+                $router1->match($attr->methods, $attr->uri, "$method->class@$method->name")->name($attr->uri);
+            }
+        });
     }
 
     /**

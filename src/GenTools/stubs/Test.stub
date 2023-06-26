@@ -1,0 +1,14 @@
+<?php
+
+namespace Tests\Modules\{{$ModuleName}};
+
+
+use Tests\TestCase;
+
+/**
+ * {{$ControllerName}}
+ */
+class {{$ModuleName}}ControllerTest extends TestCase
+{
+__content__
+}

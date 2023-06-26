@@ -1,17 +1,17 @@
 <?php
 
-namespace LaravelCommonNew\GenTools;
+namespace LaravelCommonNew\GenTools\Commands;
 
-use Doctrine\DBAL\Exception;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
+use LaravelCommonNew\GenTools\GenFilesServices;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
 
-class GCommand extends Command
+class GenFilesCommand extends Command
 {
-    protected $name = 'g';
+    protected $name = 'gf';
     protected $description = 'Generate files';
 
     /**
@@ -41,7 +41,7 @@ class GCommand extends Command
 
     /**
      * @return void
-     * @throws \Exception
+     * @throws Exception
      */
     public function handle(): void
     {
@@ -68,14 +68,13 @@ class GCommand extends Command
             }, $arr);
             GenFilesServices::GenController($arr, $tableName, $force);
         } elseif ($options['test']) {
-
+            $this->line('TODO');
         } elseif ($options['enum']) {
-            $this->makeEnum($key);
-            return;
-        } elseif ($options['force']) {
-
+            if (!Str::of($key)->endsWith('Enum'))
+                $key .= 'Enum';
+            GenFilesServices::GenEnum($key, $force);
         } else {
-
+            $this->error('Please select a file type to generate');
         }
     }
 }

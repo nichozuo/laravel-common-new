@@ -19,7 +19,8 @@
         "rap2hpoutre/fast-excel": "^5.2",
         "spatie/laravel-permission": "^5.10",
         "vinkla/hashids": "^11.0",
-        "orangehill/iseed": "^3.0"
+        "orangehill/iseed": "^3.0",
+        "php-di/phpdoc-reader": "2.2.1"
     },
     "autoload": {
         "psr-4": {

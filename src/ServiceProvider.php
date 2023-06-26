@@ -3,11 +3,13 @@
 namespace LaravelCommonNew;
 
 use Illuminate\Database\Schema\Blueprint;
-use LaravelCommonNew\App\Commands\DbBackupCommand;
-use LaravelCommonNew\App\Commands\DTCommand;
-use LaravelCommonNew\DBTools\DBCCommand;
-use LaravelCommonNew\GenTools\GCommand;
-use LaravelCommonNew\RouterTools\RTCCommand;
+use LaravelCommonNew\DBTools\Commands\DBBackupCommand;
+use LaravelCommonNew\DBTools\Commands\DBCacheCommand;
+use LaravelCommonNew\DBTools\Commands\DBDumpCommand;
+use LaravelCommonNew\GenTools\Commands\GenAllEnumsCommand;
+use LaravelCommonNew\GenTools\Commands\GenAllModelsCommand;
+use LaravelCommonNew\GenTools\Commands\GenFilesCommand;
+use LaravelCommonNew\RouterTools\Commands\RouterCacheCommand;
 
 
 /**
@@ -19,11 +21,13 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     {
         // commands
         $this->commands([
-            DBCCommand::class,
-            RTCCommand::class,
-            DbBackupCommand::class,
-            DTCommand::class,
-            GCommand::class,
+            DBCacheCommand::class,
+            DBBackupCommand::class,
+            DBDumpCommand::class,
+            RouterCacheCommand::class,
+            GenFilesCommand::class,
+            GenAllEnumsCommand::class,
+            GenAllModelsCommand::class,
         ]);
 
         // blueprint macros

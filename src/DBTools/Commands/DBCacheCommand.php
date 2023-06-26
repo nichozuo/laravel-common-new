@@ -1,11 +1,12 @@
 <?php
 
-namespace LaravelCommonNew\DBTools;
+namespace LaravelCommonNew\DBTools\Commands;
 
 use Doctrine\DBAL\Exception;
 use Illuminate\Console\Command;
+use LaravelCommonNew\DBTools\DBToolsServices;
 
-class DBCCommand extends Command
+class DBCacheCommand extends Command
 {
     protected $signature = 'dbc';
     protected $description = 'Cache DBModel to disk';

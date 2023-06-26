@@ -13,7 +13,10 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
 /**
- *
+ * @method static ifWhereLike(array $params, string $string)
+ * @method static unique(array $params, string[] $array, string $string)
+ * @method static create(array $params)
+ * @method static idp(array $params)
  */
 trait ModelTrait
 {

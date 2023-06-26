@@ -16,6 +16,16 @@ use LaravelCommonNew\DBTools\Models\TableModel;
 class DBToolsServices
 {
     /**
+     * @return DBModel
+     */
+    public static function GetTables(): DBModel
+    {
+        return Cache::store('file')->rememberForever('DBModel', function () {
+            return self::Gen();
+        });
+    }
+
+    /**
      * @param string $tableName
      * @return TableModel
      * @throws \Exception
@@ -121,6 +131,7 @@ class DBToolsServices
         $model->nullableString = $model->nullable ? 'required' : 'nullable';
         $model->comment = $comment;
         $model->default = $column->getDefault();
+        $model->isPrimaryKey = $column->getName() == 'id';
 
         // foreign key
         // 备注中有：ref[表名]
