@@ -3,240 +3,138 @@
 namespace LaravelCommonNew\RouterTools;
 
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 use LaravelCommonNew\App\Middleware\JsonWrapperMiddleware;
+use LaravelCommonNew\RouterTools\Models\ActionModel;
 use LaravelCommonNew\RouterTools\Models\ControllerModel;
-use LaravelCommonNew\RouterTools\Models\MethodModel;
 use LaravelCommonNew\Utils\DocBlockReader;
 use ReflectionClass;
 use ReflectionException;
-use ReflectionMethod;
-use Symfony\Component\Finder\SplFileInfo;
 
 class RouterToolsServices
 {
     /**
-     * @param $router
      * @return void
      * @throws ReflectionException
      */
-    public static function AutoGenRouters($router): void
+    public static function Auto(): void
+    {
+        $controllers = self::GenRoutersModels();
+
+        foreach ($controllers as $controller) {
+            Route::prefix($controller->routerPrefix)
+                ->name($controller->routerName)
+                ->group(function ($router1) use ($controller) {
+                    foreach ($controller->actions as $action) {
+                        if (!$action->skipInRouter)
+                            $router1->match($action->method, $action->uri, $action->action)
+                                ->middleware($action->middlewares)
+                                ->name("." . $action->uri);
+                    }
+                });
+        }
+    }
+
+
+    /**
+     * @return ControllerModel[]
+     * @throws ReflectionException
+     */
+    public static function GenRoutersModels(): array
     {
         $appPath = app_path();
         $files = File::allFiles(app_path('Modules'));
+        $controllers = [];
         foreach ($files as $file) {
-            $modulesName = str_replace($appPath . DIRECTORY_SEPARATOR . 'Modules' . DIRECTORY_SEPARATOR, '', $file->getPath());
-            $controllerName = str_replace('.php', '', $file->getFilename());
-            $className = str_replace(DIRECTORY_SEPARATOR, '\\', "App\\Modules\\$modulesName\\$controllerName");
-            $prefix = self::getPrefix($modulesName);
-            self::parseController($router, $prefix, $className);
+            $pathName = $file->getPathname();
+            $pathName = str_replace($appPath, '', $pathName);
+            $pathName = str_replace('.php', '', $pathName);
+            $pathName = "App" . str_replace(DIRECTORY_SEPARATOR, '\\', $pathName);
+            $controllers[$pathName] = self::parseController($pathName);
         }
+        return $controllers;
     }
 
     /**
-     * @param $router
-     * @param array $prefix
-     * @param string $className
-     * @return void
-     * @throws ReflectionException
-     */
-    private static function parseController($router, array $prefix, string $className): void
-    {
-        $classRef = new ReflectionClass($className);
-//        $classDocComment = DocBlockReader::parse($classRef->getDocComment());
-
-        $controllerName = Str::snake(str_replace('Controller', '', $classRef->getShortName()));
-        $prefix[] = $controllerName;
-        $router->prefix(implode('/', $prefix))->name(implode('.', $prefix) . '.')->group(function ($router1) use ($classRef, $className) {
-            foreach ($classRef->getMethods() as $method) {
-                // 过滤方法
-                if ($method->class != $className || $method->getModifiers() !== 1 || $method->isConstructor())
-                    continue;
-
-                $methodDocComment = DocBlockReader::parse($method->getDocComment());
-
-                // 是否忽略在路由中
-                if (isset($methodDocComment['skipRouter']))
-                    continue;
-
-                $middlewares = [];
-
-                // 是否忽略授权
-                if (!isset($methodDocComment['skipAuth'])) {
-                    $middlewares[] = 'auth:sanctum';
-                }
-
-                // 是否忽略WrapJson
-                if (!isset($methodDocComment['skipWrap'])) {
-                    $middlewares[] = JsonWrapperMiddleware::class;
-                }
-
-                // method
-                if (isset($methodDocComment['method'])) {
-                    $methodName = explode('|', $methodDocComment['method']);
-                } else {
-                    $methodName = ['POST','GET'];
-                }
-
-                // uri
-                $uri = Str::snake($method->name);
-
-                // action
-                $action = "$method->class@$method->name";
-                $router1->match($methodName, $uri, $action)->middleware($middlewares)->name($uri);
-            }
-        });
-    }
-
-    /**
-     * @param SplFileInfo $file
-     * @param string $appPath
+     * @param string $pathName
      * @return ControllerModel
      * @throws ReflectionException
      */
-    private static function parseControllerModel(SplFileInfo $file, string $appPath): ControllerModel
+    private static function parseController(string $pathName): ControllerModel
     {
-        $model = new ControllerModel();
+        $controllerName = last(explode('\\', $pathName));
+        $modulesName = str_replace('App\\Modules\\', '', $pathName);
+        $modulesName = str_replace('\\' . $controllerName, '', $modulesName);
 
-        // name
-        $model->name = str_replace('Controller.php', '', $file->getFilename());
+        $c = new ControllerModel();
 
-        // modules
-        $modules = str_replace($appPath . DIRECTORY_SEPARATOR . 'Modules' . DIRECTORY_SEPARATOR, '', $file->getPath());
-        $model->modules = explode(DIRECTORY_SEPARATOR, $modules);
+        $classRef = new ReflectionClass($pathName);
+        $intro = DocBlockReader::parse($classRef->getDocComment())['intro'] ?? '';
 
-        // namespace
-        $model->namespace = implode('\\', ["App", "Modules", ...$model->modules, $model->name]) . 'Controller';
+        $modules = explode('\\', $modulesName);
+        $modules[] = $controllerName;
+        $arr = array_map(function ($item) {
+            $item = str_replace('Controller', '', $item);
+            return Str::snake($item);
+        }, $modules);
 
-        // comment
-        $classRef = new ReflectionClass($model->namespace);
-        $model->comment = self::parseTitle($classRef->getDocComment());
-
-        // methods
-//        $model->methods = self::parseMethodModels($class, $model);
-        foreach ($classRef->getMethods(ReflectionMethod::IS_PUBLIC) as $methodRef) {
-            if ($methodRef->class != $classRef->getName() || $methodRef->name == '__construct')
-                continue;
-            $model->methods[$methodRef->getName()] = self::parseMethodModels($classRef, $methodRef);
-        }
-
-        dump($model);
-        return $model;
+        $c->className = $pathName;
+        $c->modulesName = $modulesName;
+        $c->modules = $modules;
+        $c->controllerName = $controllerName;
+        $c->intro = $intro;
+        $c->routerPrefix = implode('/', $arr);
+        $c->routerName = implode('.', $arr);
+        $c->actions = self::parseActions($classRef);
+        return $c;
     }
 
     /**
      * @param ReflectionClass $classRef
-     * @param ReflectionMethod $methodRef
-     * @return MethodModel
+     * @return ActionModel[]
      */
-    private static function parseMethodModels(ReflectionClass $classRef, ReflectionMethod $methodRef): MethodModel
+    private static function parseActions(ReflectionClass $classRef): array
     {
-        $model = new MethodModel();
-
-        // name
-        $model->name = $methodRef->getName();
-
-        // comment
-        $comment = $methodRef->getDocComment();
-        $model->title = self::parseTitle($comment);
-        $args = self::parseArgs($comment);
-        $model->intro = $args['intro'] ?? null;
-        $model->method = $args['method'] ?? 'POST';
-        $model->auth = $args['auth'] ?? true;
-
-        // request params
-        $model->params = self::parseMethodParams($methodRef);
-
-        return $model;
-    }
-
-    /**
-     * @param bool|string $comment
-     * @return mixed
-     */
-    private static function parseTitle(bool|string $comment): mixed
-    {
-        $title = '';
-        if (preg_match('/\/\*\*\s*\n\s*\*\s*(.*?)\s*\n/', $comment, $matches)) {
-            $title = $matches[1];
-        }
-        return $title;
-    }
-
-    /**
-     * @param bool|string $comment
-     * @return array
-     */
-    private static function parseArgs(bool|string $comment): array
-    {
-        $params = array();
-        preg_match_all('/@(\w+)\s+(\S+)/', $comment, $matches);
-
-        for ($i = 0; $i < count($matches[1]); $i++) {
-            $params[$matches[1][$i]] = $matches[2][$i];
-        }
-        return $params;
-    }
-
-    /**
-     * @param ReflectionMethod $methodRef
-     * @return array
-     */
-    private static function parseMethodParams(ReflectionMethod $methodRef): array
-    {
-        // code
-        $startLine = $methodRef->getStartLine();
-        $endLine = $methodRef->getEndLine();
-        $length = $endLine - $startLine;
-        $source = file($methodRef->getFileName());
-        $codes = array_slice($source, $startLine, $length);
-
-        // lines
-        $strStart = ']);';
-        $strEnd = '$params = $request->validate([';
-
-        $start = $end = false;
-        $lines = [];
-        foreach ($codes as $code) {
-            $t = trim($code);
-            if ($t == $strStart) $end = true;
-            if ($start && !$end)
-                $lines[] = $t;
-            if ($t == $strEnd) $start = true;
-        }
-
-        // params
-        $params = [];
-        foreach ($lines as $line) {
-            if (Str::startsWith(trim($line), "//"))
+        $className = $classRef->getName();
+        $actions = [];
+        foreach ($classRef->getMethods() as $method) {
+            // 过滤方法
+            if ($method->class != $className || $method->getModifiers() !== 1 || $method->isConstructor())
                 continue;
-            $t1 = explode('\'', $line);
-            if (count($t1) < 3) continue;
-            $t2 = explode('|', $t1[3]);
-            $t3 = explode('#', $t1[4]);
-            $t4 = [
-                'key' => str_replace('.*.', '.\*.', $t1[1]),
-                'required' => $t2[0] == 'nullable' ? '-' : 'Y',
-                'type' => $t2[1],
-                'comment' => (count($t3) > 1) ? trim($t3[1]) : '-'
-            ];
-            $params[] = $t4;
-        }
 
-        return $params;
-    }
+            $action = new ActionModel();
 
-    /**
-     * @param string $className
-     * @return array
-     */
-    private static function getPrefix(string $className): array
-    {
-        $arr = explode(DIRECTORY_SEPARATOR, $className);
-        $result = [];
-        foreach ($arr as $item) {
-            $result[] = Str::snake($item);
+            $doc = DocBlockReader::parse($method->getDocComment());
+
+            $action->intro = $doc['intro'] ?? '';
+            $action->methodName = $method->name;
+            $action->uri = Str::snake($method->name);
+            $action->method = $doc['method'] ?? 'POST';
+
+            $action->skipInRouter = isset($doc['skipInRouter']);
+            $action->skipAuth = isset($doc['skipAuth']);
+            $action->skipWrap = isset($doc['skipWrap']);
+
+            $middlewares = [];
+            if (!$action->skipAuth) $middlewares[] = 'auth:sanctum';
+            if (!$action->skipWrap) $middlewares[] = JsonWrapperMiddleware::class;
+            $action->middlewares = $middlewares;
+
+            $action->action = "$method->class@$method->name";
+
+            $actions[] = $action;
+
+//            // method
+//            if (isset($methodDocComment['method'])) {
+//                $methodName = explode('|', $methodDocComment['method']);
+//            } else {
+//                $methodName = ['POST', 'GET'];
+//            }
+
+            // action
+//            $router1->match($methodName, $uri, $action)->middleware($middlewares)->name($uri);
         }
-        return $result;
+        return $actions;
     }
 }

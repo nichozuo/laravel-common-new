@@ -4,14 +4,15 @@ namespace LaravelCommonNew\RouterTools\Models;
 
 class ControllerModel
 {
-    public string $name;
+    public string $className;
+    public string $modulesName;
     public array $modules;
-
-    public string $namespace;
-    public string $comment;
-
+    public string $controllerName;
+    public string $intro;
+    public string $routerPrefix;
+    public string $routerName;
     /**
-     * @var MethodModel[]
+     * @var ActionModel[]
      */
-    public array $methods;
+    public array $actions;
 }
