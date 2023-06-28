@@ -127,8 +127,8 @@ class DBToolsServices
         $model->typeString = Constants::ColumnType[$model->type] ?? 'unknown';
         $model->length = $column->getLength();
         $model->precision = $column->getPrecision();
-        $model->nullable = $column->getNotnull();
-        $model->nullableString = $model->nullable ? 'required' : 'nullable';
+        $model->notNull = $column->getNotnull();
+        $model->nullableString = $model->notNull ? 'required' : 'nullable';
         $model->comment = $comment;
         $model->default = $column->getDefault();
         $model->isPrimaryKey = $column->getName() == 'id';

@@ -9,7 +9,7 @@ class ColumnModel
     public string $typeString;
     public ?int $length;
     public int $precision;
-    public bool $nullable;
+    public bool $notNull;
     public string $nullableString;
     public ?string $comment;
     public ?string $default;

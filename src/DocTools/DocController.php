@@ -2,28 +2,21 @@
 
 namespace LaravelCommonNew\DocTools;
 
-use Illuminate\Http\Request;
+use cebe\openapi\exceptions\TypeErrorException;
+use Doctrine\DBAL\Exception;
 use Illuminate\Routing\Controller;
+use ReflectionException;
 
 class DocController extends Controller
 {
-    public function getMenu(Request $request)
+    /**
+     * @return mixed
+     * @throws Exception
+     * @throws ReflectionException
+     * @throws TypeErrorException
+     */
+    public function getOpenApi(): mixed
     {
-        $params = $request->validate([
-            'type' => 'required|in:enum,dict,db,api',
-        ]);
-        $type = $params['type'];
-        return match ($type) {
-            'api' => $this->getApiMenu(),
-            'enum' => $this->getEnumMenu(),
-            'dict' => $this->getDictMenu(),
-            'db' => $this->getDbMenu(),
-            default => [],
-        };
-    }
-
-    private function getApiMenu()
-    {
-
+        return json_decode(DocToolsServices::GenOpenApiV3Doc());
     }
 }

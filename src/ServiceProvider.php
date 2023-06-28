@@ -6,11 +6,10 @@ use Illuminate\Database\Schema\Blueprint;
 use LaravelCommonNew\DBTools\Commands\DBBackupCommand;
 use LaravelCommonNew\DBTools\Commands\DBCacheCommand;
 use LaravelCommonNew\DBTools\Commands\DBDumpCommand;
-use LaravelCommonNew\DocTools\Commands\GenDocCommand;
+use LaravelCommonNew\DocTools\Commands\GenOpenApiV3DocCommand;
 use LaravelCommonNew\GenTools\Commands\GenAllEnumsCommand;
 use LaravelCommonNew\GenTools\Commands\GenAllModelsCommand;
 use LaravelCommonNew\GenTools\Commands\GenFilesCommand;
-use LaravelCommonNew\RouterTools\Commands\RouterCacheCommand;
 
 
 /**
@@ -28,11 +27,10 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
             DBCacheCommand::class,
             DBBackupCommand::class,
             DBDumpCommand::class,
-            RouterCacheCommand::class,
             GenFilesCommand::class,
             GenAllEnumsCommand::class,
             GenAllModelsCommand::class,
-            GenDocCommand::class,
+            GenOpenApiV3DocCommand::class,
         ]);
 
         // blueprint macros
@@ -55,5 +53,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         $this->publishes([
             __DIR__ . '/App/common.php' => config_path("common.php"),
         ]);
+
+        $this->loadRoutesFrom(__DIR__ . '/DocTools/api.php');
     }
 }
