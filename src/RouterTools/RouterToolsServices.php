@@ -173,12 +173,6 @@ class RouterToolsServices
             if (count($t1) < 3) continue;
             $t2 = explode('|', $t1[3]);
             $t3 = explode('#', $t1[4]);
-//            $t4 = [
-//                'key' => str_replace('.*.', '.\*.', $t1[1]),
-//                'required' => $t2[0] == 'nullable' ? '-' : 'Y',
-//                'type' => $t2[1],
-//                'comment' => (count($t3) > 1) ? trim($t3[1]) : '-'
-//            ];
             $param->key = str_replace('.*.', '.\*.', $t1[1]);
             $param->required = $t2[0] != 'nullable';
             $param->type = $t2[1];

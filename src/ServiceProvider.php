@@ -6,7 +6,6 @@ use Illuminate\Database\Schema\Blueprint;
 use LaravelCommonNew\DBTools\Commands\DBBackupCommand;
 use LaravelCommonNew\DBTools\Commands\DBCacheCommand;
 use LaravelCommonNew\DBTools\Commands\DBDumpCommand;
-use LaravelCommonNew\DocTools\Commands\GenOpenApiV3DocCommand;
 use LaravelCommonNew\GenTools\Commands\GenAllEnumsCommand;
 use LaravelCommonNew\GenTools\Commands\GenAllModelsCommand;
 use LaravelCommonNew\GenTools\Commands\GenFilesCommand;
@@ -30,7 +29,6 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
             GenFilesCommand::class,
             GenAllEnumsCommand::class,
             GenAllModelsCommand::class,
-            GenOpenApiV3DocCommand::class,
         ]);
 
         // blueprint macros
