@@ -2,87 +2,132 @@
 
 namespace LaravelCommonNew\DocTools;
 
-use cebe\openapi\exceptions\TypeErrorException;
-use cebe\openapi\spec\Info;
-use cebe\openapi\spec\OpenApi;
-use cebe\openapi\spec\Operation;
-use cebe\openapi\spec\Parameter;
-use cebe\openapi\spec\PathItem;
-use cebe\openapi\spec\Server;
-use cebe\openapi\Writer;
 use Illuminate\Support\Facades\File;
+use LaravelCommonNew\RouterTools\RouterToolsServices;
+use ReflectionException;
 
 class DocToolsServices
 {
     /**
      * @return void
-     * @throws TypeErrorException
+     * @throws ReflectionException
      */
     public static function GenDoc(): void
     {
-        // create base API Description
+        $paths = self::getPaths();
+
         $openapi = [
             'openapi' => '3.0.1',
             'info' => [
                 'title' => config('app.name'),
                 'version' => '0.0.x',
             ],
-            'tags' => [
-                ['name' => '接口声明', 'description' => '接口声明'],
-                ['name' => '枚举类型', 'description' => '枚举类型'],
-                ['name' => '数据字典', 'description' => '数据字典'],
-                ['name' => '开发规范', 'description' => '开发规范'],
-            ],
+            'tags' => [],
             'servers' => [
                 [
-                    "description" => "Development server (develop)",
-                    "url" => "http://0.0.0.0:8000/api/"
-                ],
-                [
-                    "description" => "Prod server (main)",
+                    "description" => "Server Address",
                     "url" => config('app.url') . "/api/"
                 ]
             ],
-            'paths' => [
-                '/admin/auth/login' => [
-                    'post' => [
-                        "summary" => "管理员登录",
-                        "x-apifox-folder" => "Admin/AuthController",
-                        "description" => "管理员登录",
-                        "tags" => [
-                            "Admin/AuthController"
-                        ],
-                        "parameters" => [],
-                        "requestBody" => [
-                            "content" => [
-                                "application/x-www-form-urlencoded" => [
-                                    "schema" => [
-                                        "type" => "object",
-                                        "properties" => [
-                                            "phone" => [
-                                                "type" => "string",
-                                                "enum" => ["apple", "banana", "orange"],
-                                                "description" => "用户名",
-                                                "example" => "13800138000"
-                                            ],
-                                            "password" => [
-                                                "type" => "string",
-                                                "description" => "密码",
-                                                "example" => "123123"
-                                            ]
+            'paths' => $paths,
+            'components' => [
+                "responses" => [
+                    "default" => [
+                        "description" => "default response",
+                        "content" => [
+                            "application/json" => [
+                                "schema" => [
+                                    "type" => "object",
+                                    "properties" => [
+                                        "code" => [
+                                            "type" => "integer",
+                                            "description" => "code",
+                                            "example" => 0,
                                         ],
-                                        "required" => [
-                                            "phone",
-                                            "password"
+                                        "message" => [
+                                            "type" => "string",
+                                            "description" => "message",
+                                            "example" => "ok",
+                                        ],
+                                        "data" => [
+                                            "type" => "object",
+                                            "description" => "data"
                                         ]
                                     ]
                                 ]
                             ]
-                        ],
-                    ],
-                ],
-            ],
+                        ]
+                    ]
+                ]
+            ]
         ];
-        File::put(storage_path('openapi.json'), json_encode($openapi, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+
+
+        File::put(storage_path('openapi.json'), json_encode($openapi, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+    }
+
+    /**
+     * @return array
+     * @throws ReflectionException
+     */
+    private static function getPaths(): array
+    {
+        $controllers = RouterToolsServices::GenRoutersModels();
+        $paths = [];
+        foreach ($controllers as $controller) {
+            foreach ($controller->actions as $action) {
+                // 生成参数
+                if ($action->params) {
+
+                    $properties = [];
+                    $required = [];
+
+                    foreach ($action->params as $param) {
+                        $properties[$param->key] = [
+                            'type' => $param->type,
+                            'description' => $param->description
+                        ];
+                        if ($param->required) {
+                            $required[] = $param->key;
+                        }
+                    }
+
+                    $requestBody = [
+                        'content' => [
+                            'application/x-www-form-urlencoded' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => $properties,
+                                    'required' => $required,
+                                ]
+                            ]
+                        ]
+                    ];
+                } else {
+                    $requestBody = [];
+                }
+
+
+                $data = [
+                    strtolower($action->method[0]) => [
+                        "summary" => $action->intro,
+                        "x-apifox-folder" => implode('/', $controller->modules),
+                        "description" => $action->intro,
+                        "tags" => [
+                            implode('/', $controller->modules)
+                        ],
+                        "parameters" => [],
+                        "requestBody" => $requestBody,
+                        "responses" => [
+                            "default" => [
+                                "\$ref" => "#/components/responses/default"
+                            ]
+                        ]
+                    ]
+                ];
+                $paths["/$controller->routerPrefix/$action->uri"] = $data;
+            }
+        }
+        return $paths;
     }
 }
