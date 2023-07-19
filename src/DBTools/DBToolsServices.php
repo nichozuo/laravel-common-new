@@ -127,6 +127,7 @@ class DBToolsServices
         $model->typeString = Constants::ColumnType[$model->type] ?? 'unknown';
         $model->length = $column->getLength();
         $model->precision = $column->getPrecision();
+        $model->scale = $column->getScale();
         $model->notNull = $column->getNotnull();
         $model->nullableString = $model->notNull ? 'required' : 'nullable';
         $model->comment = $comment;
@@ -221,5 +222,44 @@ class DBToolsServices
         }
 
         return $str;
+    }
+
+    /**
+     * @return array
+     */
+    public static function GenDocTree(): array
+    {
+        $tree = [];
+        foreach (self::GetTables()->tables as $table) {
+            $tree[] = [
+                'key' => $table->name,
+                'title' => $table->name,
+                'description' => $table->comment,
+                'isLeaf' => true,
+            ];
+        }
+        return $tree;
+    }
+
+    /**
+     * @return array
+     */
+    public static function GenDocList(): array
+    {
+        $nodes = [];
+        foreach (self::GetTables()->tables as $table) {
+            $columns = [];
+            foreach ($table->columns as $key => $column){
+                $columns[] = $column;
+            }
+
+            $nodes[$table->name] = [
+                'key' => $table->name,
+                'title' => $table->name,
+                'description' => $table->comment,
+                'columns' => $columns,
+            ];
+        }
+        return $nodes;
     }
 }

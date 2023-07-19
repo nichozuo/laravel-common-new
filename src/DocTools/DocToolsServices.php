@@ -17,6 +17,7 @@ use cebe\openapi\spec\Server;
 use cebe\openapi\spec\Tag;
 use cebe\openapi\Writer;
 use Doctrine\DBAL\Exception;
+use JetBrains\PhpStorm\ArrayShape;
 use LaravelCommonNew\DBTools\DBToolsServices;
 use LaravelCommonNew\RouterTools\RouterToolsServices;
 use ReflectionException;
@@ -24,14 +25,15 @@ use ReflectionException;
 class DocToolsServices
 {
     /**
-     * @throws Exception
-     * @throws ReflectionException
+     * @return string
      * @throws TypeErrorException
+     * @throws ReflectionException
      */
     public static function GenOpenApiV3Doc(): string
     {
-        list($tags, $paths) = self::getPathsAndTags();
-        $schemas = self::getSchemas();
+//        list($tags, $paths) = self::getPathsAndTags();
+//        $components = self::getComponents();
+//        $schemas = self::getSchemas();
 
         $openapi = new OpenApi([
             'openapi' => '3.0.1',
@@ -45,38 +47,19 @@ class DocToolsServices
                     "url" => config('app.url') . "/api/"
                 ])
             ],
-            'tags' => $tags,
-            'paths' => $paths,
-            'components' => [
-                "responses" => new Responses([
-                    'default' => new Response([
-                        "description" => "default response",
-                        "content" => [
-                            "application/json" => new MediaType([
-                                "schema" => new Schema([
-                                    "type" => "object",
-                                    "properties" => [
-                                        "code" => new Schema([
-                                            "type" => "integer",
-                                            "description" => "code",
-                                            "example" => 0,
-                                        ]),
-                                        "message" => new Schema([
-                                            "type" => "string",
-                                            "description" => "message",
-                                            "example" => "ok",
-                                        ]),
-                                        "data" => new Schema([
-                                            "type" => "object",
-                                            "description" => "data"
-                                        ])
-                                    ]
-                                ])
-                            ])
-                        ]
-                    ])
-                ]),
-                "schemas" => $schemas,
+//            'tags' => $tags,
+//            'paths' => $paths,
+//            'components' => $components,
+            'extends' => [
+                'tree' => [
+                    'api' => RouterToolsServices::GenDocTree(),
+                    'db' => DBToolsServices::GenDocTree(),
+                ],
+                'data' => [
+                    'api' => RouterToolsServices::GenDocList(),
+                    'db' => DBToolsServices::GenDocList(),
+//                    'enums' => [],
+                ],
             ]
         ]);
         return Writer::writeToJson($openapi);
@@ -189,5 +172,44 @@ class DocToolsServices
         // enums
 
         return $schemas;
+    }
+
+    /**
+     * @return array
+     * @throws TypeErrorException
+     */
+    #[ArrayShape(["responses" => "\cebe\openapi\spec\Responses", "schemas" => ""])]
+    private static function getComponents(): array
+    {
+        return [
+            "responses" => new Responses([
+                'default' => new Response([
+                    "description" => "default response",
+                    "content" => [
+                        "application/json" => new MediaType([
+                            "schema" => new Schema([
+                                "type" => "object",
+                                "properties" => [
+                                    "code" => new Schema([
+                                        "type" => "integer",
+                                        "description" => "code",
+                                        "example" => 0,
+                                    ]),
+                                    "message" => new Schema([
+                                        "type" => "string",
+                                        "description" => "message",
+                                        "example" => "ok",
+                                    ]),
+                                    "data" => new Schema([
+                                        "type" => "object",
+                                        "description" => "data"
+                                    ])
+                                ]
+                            ])
+                        ])
+                    ]
+                ])
+            ]),
+        ];
     }
 }

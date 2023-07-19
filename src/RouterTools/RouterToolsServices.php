@@ -49,6 +49,7 @@ class RouterToolsServices
         $controllers = [];
         foreach ($files as $file) {
             $pathName = $file->getPathname();
+            if (str()->of($pathName)->contains('BaseController.php')) continue;
             $pathName = str_replace($appPath, '', $pathName);
             $pathName = str_replace('.php', '', $pathName);
             $pathName = "App" . str_replace(DIRECTORY_SEPARATOR, '\\', $pathName);
@@ -180,5 +181,87 @@ class RouterToolsServices
             $arr2[] = $param;
         }
         return $arr2;
+    }
+
+    /**
+     * @return array
+     * @throws ReflectionException
+     */
+    public static function GenDocTree(): array
+    {
+        $controllers = self::GenRoutersModels();
+        $apis = [];
+        $apiKeys = [];
+
+        foreach ($controllers as $controller) {
+            // 处理modules
+            $modules = [];
+            foreach ($controller->modules as $module) {
+                $modules[] = $module;
+                $modulesString = implode('/', $modules);
+                if (in_array($modulesString, $apiKeys))
+                    continue;
+                $apiKeys[] = $modulesString;
+                $apis[$modulesString] = [
+                    'key' => $modulesString,
+                    'title' => $modulesString,
+                    'description' => '',
+                    'parent' => implode('/', array_slice($modules, 0, -1)),
+                ];
+            }
+            // 处理actions
+            $parentKey = implode('/', $controller->modules);
+            foreach ($controller->actions as $action) {
+                $key = "/$controller->routerPrefix/$action->uri";
+                $apis[$key] = [
+                    'key' => $key,
+                    'title' => $action->uri,
+                    'description' => $action->intro,
+                    'parent' => $parentKey,
+                    'isLeaf' => true,
+                ];
+            }
+        }
+        return self::buildTree($apis, "");
+    }
+
+    /**
+     * @param array $apis
+     * @param string $parent
+     * @return array
+     */
+    private static function buildTree(array $apis, string $parent): array
+    {
+        $node = [];
+        foreach ($apis as $key => $api) {
+            if ($api['parent'] == $parent) {
+                $api['children'] = self::buildTree($apis, $key);
+                $node[] = $api;
+            }
+        }
+        return $node;
+    }
+
+    /**
+     * @return array
+     * @throws ReflectionException
+     */
+    public static function GenDocList(): array
+    {
+        $controllers = self::GenRoutersModels();
+        $apis = [];
+        foreach ($controllers as $controller) {
+            foreach ($controller->actions as $action) {
+                $key = "/$controller->routerPrefix/$action->uri";
+                $apis[$key] = [
+                    'key' => $key,
+                    'title' => $action->uri,
+                    'description' => $action->intro,
+                    'method' => implode(',', $action->method),
+                    'params' => $action->params
+                ];
+            }
+        }
+        return $apis;
     }
 }
