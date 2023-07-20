@@ -50,6 +50,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     {
         $this->publishes([
             __DIR__ . '/App/common.php' => config_path("common.php"),
+            __DIR__ . '/DocTools/docs' => public_path("docs"),
         ]);
 
         $this->loadRoutesFrom(__DIR__ . '/DocTools/api.php');

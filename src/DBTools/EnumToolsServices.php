@@ -78,4 +78,42 @@ class EnumToolsServices
         }
         return $str;
     }
+
+    /**
+     * @return array
+     * @throws ReflectionException
+     */
+    public static function GenDocTree(): array
+    {
+        $enums = self::GetEnums();
+        $tree = [];
+        foreach ($enums as $enum) {
+            $tree[] = [
+                'key' => $enum->name,
+                'title' => $enum->name,
+                'description' => $enum->intro,
+                'isLeaf' => true,
+            ];
+        }
+        return $tree;
+    }
+
+    /**
+     * @return array
+     * @throws ReflectionException
+     */
+    public static function GenDocList(): array
+    {
+        $enums = self::GetEnums();
+        $list = [];
+        foreach ($enums as $enum) {
+            $list[$enum->name] = [
+                'key' => $enum->name,
+                'title' => $enum->name,
+                'description' => $enum->intro,
+                'consts' => $enum->consts,
+            ];
+        }
+        return $list;
+    }
 }

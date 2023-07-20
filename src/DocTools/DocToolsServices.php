@@ -19,6 +19,7 @@ use cebe\openapi\Writer;
 use Doctrine\DBAL\Exception;
 use JetBrains\PhpStorm\ArrayShape;
 use LaravelCommonNew\DBTools\DBToolsServices;
+use LaravelCommonNew\DBTools\EnumToolsServices;
 use LaravelCommonNew\RouterTools\RouterToolsServices;
 use ReflectionException;
 
@@ -54,16 +55,16 @@ class DocToolsServices
                 'tree' => [
                     'api' => RouterToolsServices::GenDocTree(),
                     'db' => DBToolsServices::GenDocTree(),
+                    'enum' => EnumToolsServices::GenDocTree(),
                 ],
                 'data' => [
                     'api' => RouterToolsServices::GenDocList(),
                     'db' => DBToolsServices::GenDocList(),
-//                    'enums' => [],
+                    'enum' => EnumToolsServices::GenDocList(),
                 ],
             ]
         ]);
         return Writer::writeToJson($openapi);
-//        File::put(storage_path('openapi.json'), );
     }
 
     /**
