@@ -5,7 +5,7 @@ namespace LaravelCommonNew\App\Traits;
 
 use Closure;
 use DateTimeInterface;
-use LaravelCommonNew\App\Exceptions\Err;
+use LaravelCommonNew\App\Exceptions\ErrConst;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +13,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 
 /**
- * @method static ifWhereLike(array $params, string $string)
+ * @method static ifWhereLike(array $params, string $key, string $field = '')
  * @method static unique(array $params, string[] $array, string $string)
  * @method static create(array $params)
  * @method static idp(array $params)
@@ -45,7 +45,7 @@ trait ModelTrait
      * @param int $id
      * @param bool $throw
      * @return static
-     * @throws Err
+     * @throws ErrConst
      */
     public static function GetById(int $id, bool $throw = true): static
     {
@@ -53,7 +53,7 @@ trait ModelTrait
         if (!$model && $throw) {
             $m = new static();
             $msg = $m->comment;
-            Err::Throw("[$msg]数据不存在");
+            ErrConst::Throw("[$msg]数据不存在");
         }
         return $model;
     }
@@ -155,27 +155,11 @@ trait ModelTrait
      * @param array $params
      * @param string $key
      * @param string $field
-     * @return mixed
-     */
-    public function scopeIfWhereLike(Builder $query, array $params, string $key, string $field = ''): Builder
-    {
-        if (isset($params[$key])) {
-            $field = ($field == '') ? $key : $field;
-            return $query->where($field, 'like', "%$params[$key]%");
-        }
-        return $query;
-    }
-
-    /**
-     * @param Builder $query
-     * @param array $params
-     * @param string $key
-     * @param string $field
      * @param string $type
      * @param string $op1
      * @param string $op2
      * @return Builder
-     * @throws Err
+     * @throws ErrConst
      */
     public function scopeIfRange(Builder $query, array $params, string $key, string $field = '', string $type = 'datetime', string $op1 = '<', string $op2 = '>='): Builder
     {
@@ -184,7 +168,7 @@ trait ModelTrait
             $a = $params[$key];
 
             if (is_array($a) && count($a) != 2)
-                throw Err::Throw('The params of IfRange need be a array');
+                throw ErrConst::Throw('The params of IfRange need be a array');
 
             // 数据类型
             if ($type == 'date') {
@@ -243,7 +227,7 @@ trait ModelTrait
      * @param string|null $label
      * @param bool $softDelete
      * @return Builder
-     * @throws Err
+     * @throws ErrConst
      */
     public function scopeUnique(Builder $query, array $params, array $keys, string $label = null, bool $softDelete = false, string $field = 'id'): Builder
     {
@@ -254,7 +238,7 @@ trait ModelTrait
             $model = $query->where($data)->first();
         if ($model && $label != null) {
             if (!isset($params[$field]) || $model->$field != $params[$field])
-                throw Err::Throw("{$label}【{$params[$keys[0]]}】已存在，请重试");
+                throw ErrConst::Throw("{$label}【{$params[$keys[0]]}】已存在，请重试");
         }
         return $query;
     }
@@ -289,7 +273,7 @@ trait ModelTrait
      * @param $params
      * @param null $errMessage
      * @return bool
-     * @throws Err
+     * @throws ErrConst
      */
     public static function CheckUnique($keys, $params, $errMessage = null): bool
     {
@@ -299,7 +283,7 @@ trait ModelTrait
             return true;
         } else {
             if ($errMessage != null)
-                throw Err::Throw($errMessage);
+                throw ErrConst::Throw($errMessage);
             return false;
         }
     }
@@ -307,13 +291,13 @@ trait ModelTrait
     /**
      * @param $id
      * @return mixed
-     * @throws Err
+     * @throws ErrConst
      */
     public static function findOrError($id): mixed
     {
         $model = self::find($id);
         if (!$model)
-            throw Err::Throw("没有此【" . self::$name . "】记录");
+            throw ErrConst::Throw("没有此【" . self::$name . "】记录");
         return $model;
     }
 

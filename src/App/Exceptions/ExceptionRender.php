@@ -59,7 +59,7 @@ class ExceptionRender
                 $message = "您提交的信息不完整：请查看【{$keys}】字段";
                 $status = 400;
                 break;
-            case Err::class:
+            case ErrConst::class:
             default:
                 break;
         }

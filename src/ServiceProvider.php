@@ -9,6 +9,8 @@ use LaravelCommonNew\DBTools\Commands\DBDumpCommand;
 use LaravelCommonNew\GenTools\Commands\GenAllEnumsCommand;
 use LaravelCommonNew\GenTools\Commands\GenAllModelsCommand;
 use LaravelCommonNew\GenTools\Commands\GenFilesCommand;
+use LaravelCommonNew\GenTools\Commands\RenameMigrationFilesCommand;
+use LaravelCommonNew\GenTools\Commands\UpdateModelsCommand;
 
 
 /**
@@ -29,6 +31,8 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
             GenFilesCommand::class,
             GenAllEnumsCommand::class,
             GenAllModelsCommand::class,
+            RenameMigrationFilesCommand::class,
+            UpdateModelsCommand::class,
         ]);
 
         // blueprint macros

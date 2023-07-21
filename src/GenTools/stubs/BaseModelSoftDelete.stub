@@ -3,18 +3,16 @@
 namespace App\Models\Base;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use LaravelCommonNew\App\Traits\ModelTrait;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations;
 use App\Models;
 
 /**
 {$properties}
-{$methods}
- */
+{$methods}*/
 class Base{$modelName} extends Base
 {
-    use HasFactory, ModelTrait, SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $table = '{$name}';
     protected string $comment = '{$comment}';

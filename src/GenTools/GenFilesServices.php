@@ -39,7 +39,7 @@ class GenFilesServices
         $content = self::replaceAll([
             'modelName' => $table->modelName,
         ], $content);
-        self::saveFile(app_path("Models/$table->modelName.php"), $content, $force);
+        self::saveFile(app_path("Models/$table->modelName.php"), $content, false);
     }
 
     /**

@@ -204,8 +204,8 @@ class RouterToolsServices
                 $apiKeys[] = $modulesString;
                 $apis[$modulesString] = [
                     'key' => $modulesString,
-                    'title' => $modulesString,
-                    'description' => '',
+                    'title' => $module,
+                    'description' => last($controller->modules) == $module ? $controller->intro : '',
                     'parent' => implode('/', array_slice($modules, 0, -1)),
                 ];
             }
