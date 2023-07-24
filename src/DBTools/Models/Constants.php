@@ -9,6 +9,7 @@ class Constants
 //        'tinyint' => 'integer',
 //        'smallint' => 'integer',
 //        'mediumint' => 'integer',
+        'integer' => 'integer',
         'bigint' => 'integer',
         'string' => 'string',
 //        'float' => 'float',

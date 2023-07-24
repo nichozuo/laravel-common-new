@@ -11,6 +11,7 @@ use LaravelCommonNew\App\Exceptions\ErrConst;
 
 /**
  * @method static ifWhereLike(array $params, string $key, ?string $field = null): Builder
+ * @method static ifWhere(array $params, string $key, ?string $field = null): Builder
  * @method static order(string $key = 'orderBy'): Builder
  * @method static page(): LengthAwarePaginator
  * @method static getById(int $id, bool $throw = false, bool $lock = false): Model|Builder|null
@@ -32,9 +33,43 @@ class BaseModel extends Model
      * @param string|null $field 字段名
      * @return Builder
      */
+    public function scopeIfWhere(Builder $builder, array $params, string $key, ?string $field = null): Builder
+    {
+        return ($params[$key] ?? false) ? $builder->where($field ?? $key, $params[$key]) : $builder;
+    }
+
+    /**
+     * @param Builder $builder
+     * @param array $params 请求参数
+     * @param string $key 请求参数的key
+     * @param string|null $field 字段名
+     * @return Builder
+     */
     public function scopeIfWhereLike(Builder $builder, array $params, string $key, ?string $field = null): Builder
     {
         return ($params[$key] ?? false) ? $builder->where($field ?? $key, 'like', "%$params[$key]%") : $builder;
+    }
+
+    /**
+     * @param Builder $builder
+     * @param array $params
+     * @param string $key
+     * @param array $fields
+     * @return Builder
+     */
+    public function scopeIfWhereKeyword(Builder $builder, array $params, string $key, array $fields): Builder
+    {
+        $value = $params[$key] ?? null;
+        if ($value == '') $value = null;
+        if ($value) {
+            return $builder->where(function ($q) use ($value, $fields) {
+                foreach ($fields as $field) {
+                    $q->orWhere($field, 'like', "%$value%");
+                }
+            });
+        } else {
+            return $builder;
+        }
     }
 
     /**
@@ -66,8 +101,8 @@ class BaseModel extends Model
     public function scopePage(Builder $builder): LengthAwarePaginator
     {
         $perPage = request()->validate([
-            'perPage' => 'nullable|integer',
-        ])['perPage'] ?? 10;
+                'perPage' => 'nullable|integer',
+            ])['perPage'] ?? 10;
 
         $allow = config('common.perPageAllow', [10, 20, 50, 100]);
         if (!in_array($perPage, $allow))

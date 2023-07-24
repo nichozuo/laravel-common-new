@@ -121,6 +121,9 @@ class DBToolsServices
         $name = $column->getName();
         $comment = $column->getComment();
 
+//        if($column->getName() == '_lft')
+//            dd($column->getType()->getName());
+
         $model = new ColumnModel();
         $model->name = $name;
         $model->type = $column->getType()->getName();
