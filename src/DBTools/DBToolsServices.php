@@ -5,6 +5,8 @@ namespace LaravelCommonNew\DBTools;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Table;
+use Doctrine\DBAL\Types\BooleanType;
+use Doctrine\DBAL\Types\Type;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -61,6 +63,8 @@ class DBToolsServices
         $sm = DB::getDoctrineSchemaManager();
         $sm->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
 
+        $types = self::GetTypes();
+
         // process db model
         $tables = $sm->listTables();
         $dbModel = new DBModel();
@@ -73,7 +77,7 @@ class DBToolsServices
             $tableModel = self::parseTableModel($table);
             // process column model
             foreach ($table->getColumns() as $column) {
-                $columnModel = self::parseColumnModel($dbModel, $column);
+                $columnModel = self::parseColumnModel($dbModel, $column, $types);
                 $tableModel->columns[$column->getName()] = $columnModel;
                 if ($columnModel->isForeignKey) {
                     $tableModel->foreignKeys[$columnModel->name] = $columnModel->foreignTable;
@@ -116,18 +120,15 @@ class DBToolsServices
      * @param Column $column
      * @return ColumnModel
      */
-    private static function parseColumnModel(DBModel $dbModel, Column $column): ColumnModel
+    private static function parseColumnModel(DBModel $dbModel, Column $column, array $types): ColumnModel
     {
         $name = $column->getName();
         $comment = $column->getComment();
 
-//        if($column->getName() == '_lft')
-//            dd($column->getType()->getName());
-
         $model = new ColumnModel();
         $model->name = $name;
-        $model->type = $column->getType()->getName();
-        $model->typeString = Constants::ColumnType[$model->type] ?? 'unknown';
+        $model->type = $types[$column->getType()::class] ?? 'unknown';
+        $model->typeString = $types[$column->getType()::class] ?? 'unknown';
         $model->length = $column->getLength();
         $model->precision = $column->getPrecision();
         $model->scale = $column->getScale();
@@ -147,7 +148,7 @@ class DBToolsServices
             }
         }
         // 列名称：表名+_id
-        if (Str::of($name)->contains('_id') && !$model->isForeignKey) {
+        if (Str::of($name)->contains('_id') && !$model->isForeignKey && $column->getType()->getName() == 'bigint') {
             $foreignTableName = Str::of($name)->before('_id');
             if (in_array($foreignTableName, $dbModel->tableKeys)) {
                 $model->isForeignKey = true;
@@ -252,7 +253,7 @@ class DBToolsServices
         $nodes = [];
         foreach (self::GetTables()->tables as $table) {
             $columns = [];
-            foreach ($table->columns as $key => $column){
+            foreach ($table->columns as $key => $column) {
                 $columns[] = $column;
             }
 
@@ -264,5 +265,17 @@ class DBToolsServices
             ];
         }
         return $nodes;
+    }
+
+    /**
+     * @return array
+     */
+    private static function GetTypes(): array
+    {
+        $types = [];
+        foreach (Type::getTypesMap() as $key => $value) {
+            $types[$value] = $key;
+        }
+        return $types;
     }
 }

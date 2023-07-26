@@ -12,6 +12,7 @@ class Constants
         'integer' => 'integer',
         'bigint' => 'integer',
         'string' => 'string',
+        'json' => 'json',
 //        'float' => 'float',
 //        'double' => 'float',
 //        'decimal' => 'float',
@@ -42,5 +43,6 @@ class Constants
 //        'multilinestring' => 'string',
 //        'multipolygon' => 'string',
 //        'geometrycollection' => 'string',
+        'boolean' => 'boolean'
     ];
 }
