@@ -15,13 +15,12 @@ class {$modelName}Controller extends BaseController
 {
     /**
      * @intro 列表
-     * @param Request $request
      * @return mixed
      * @throws Exception
     */
-    public function list(Request $request): mixed
+    public function list(): mixed
     {
-        $params = $request->validate([
+        $params = request()->validate([
             'name' => 'nullable|string', # 模糊搜索：名称
         ]);
         return {$modelName}::ifWhereLike($params, 'name')
@@ -31,12 +30,11 @@ class {$modelName}Controller extends BaseController
 
     /**
      * @intro 添加
-     * @param Request $request
      * @return void
      */
-    public function store(Request $request): void
+    public function store(): void
     {
-        $params = $request->validate([
+        $params = request()->validate([
             {$validateString}
         ]);
         {$modelName}::unique($params, ['name'], '名称');
@@ -45,12 +43,11 @@ class {$modelName}Controller extends BaseController
 
     /**
      * @intro 修改
-     * @param Request $request
      * @return void
      */
-    public function update(Request $request): void
+    public function update(): void
     {
-        $params = $request->validate([
+        $params = request()->validate([
             'id' => 'required|integer', # id
             {$validateString}
         ]);
@@ -60,12 +57,11 @@ class {$modelName}Controller extends BaseController
 
     /**
      * @intro 查看
-     * @param Request $request
      * @return {$modelName}
      */
-    public function show(Request $request): {$modelName}
+    public function show(): {$modelName}
     {
-        $params = $request->validate([
+        $params = request()->validate([
             'id' => 'required|integer', # id
         ]);
         return {$modelName}::getById($params['id']);
@@ -73,12 +69,11 @@ class {$modelName}Controller extends BaseController
 
     /**
      * @intro 删除
-     * @param Request $request
      * @return void
      */
-    public function delete(Request $request): void
+    public function delete(): void
     {
-        $params = $request->validate([
+        $params = request()->validate([
             'id' => 'required|integer', # id
         ]);
         {$modelName}::getById($params['id'])->delete();

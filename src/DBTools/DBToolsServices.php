@@ -118,12 +118,16 @@ class DBToolsServices
     /**
      * @param DBModel $dbModel
      * @param Column $column
+     * @param array $types
      * @return ColumnModel
      */
     private static function parseColumnModel(DBModel $dbModel, Column $column, array $types): ColumnModel
     {
         $name = $column->getName();
         $comment = $column->getComment();
+
+//        if($column->getName() == 'same_subject_no')
+//            dd($column->getType());
 
         $model = new ColumnModel();
         $model->name = $name;

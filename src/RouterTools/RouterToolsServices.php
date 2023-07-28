@@ -153,7 +153,8 @@ class RouterToolsServices
 
         // 解析每一行
         $strStart = ']);';
-        $strEnd = '$params = $request->validate([';
+        $strEnd1 = '$params = $request->validate([';
+        $strEnd2 = '$params = request()->validate([';
         $start = $end = false;
         $arr1 = [];
         foreach ($lines as $line) {
@@ -161,7 +162,7 @@ class RouterToolsServices
             if ($t == $strStart) $end = true;
             if ($start && !$end)
                 $arr1[] = $t;
-            if ($t == $strEnd) $start = true;
+            if ($t == $strEnd1 || $t == $strEnd2) $start = true;
         }
 
         // 解析参数

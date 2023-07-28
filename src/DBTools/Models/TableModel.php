@@ -41,7 +41,7 @@ class TableModel
         foreach ($this->columns as $column) {
             $this->keys[] = $column->name;
 
-            $this->properties[] = "@property {$this->parseColumnType($column->type)} \$$column->name";
+            $this->properties[] = "* @property {$this->parseColumnType($column->type)} \$$column->name";
         }
 
         // $fillable
