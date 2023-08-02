@@ -61,7 +61,7 @@ class GenFilesCommand extends Command
             GenFilesServices::GenModels($tableName, $force);
         } elseif ($options['controller']) {
             $arr = explode('/', $key);
-            $tableName = Str::of(last($arr))->snake()->plural();
+            $tableName = Str::of(last($arr))->snake()->singular()->plural();
             array_pop($arr);
             $arr = array_map(function ($value) {
                 return Str::of($value)->studly();
