@@ -3,31 +3,36 @@
 namespace LaravelCommonNew;
 
 use Illuminate\Database\Schema\Blueprint;
-use LaravelCommonNew\App\Console\Commands\DbBackupCommand;
-use LaravelCommonNew\App\Console\Commands\DbCacheCommand;
-use LaravelCommonNew\App\Console\Commands\DumpTableCommand;
-use LaravelCommonNew\App\Console\Commands\GenEnumsToJSCommand;
-use LaravelCommonNew\App\Console\Commands\GenFilesCommand;
-use LaravelCommonNew\App\Console\Commands\RenameMigrationFilesCommand;
-use LaravelCommonNew\App\Console\Commands\UpdateModelsCommand;
-use LaravelCommonNew\App\Helpers\DBHelper;
+use LaravelCommonNew\DBTools\Commands\DBBackupCommand;
+use LaravelCommonNew\DBTools\Commands\DBCacheCommand;
+use LaravelCommonNew\DBTools\Commands\DBDumpCommand;
+use LaravelCommonNew\GenTools\Commands\GenAllEnumsCommand;
+use LaravelCommonNew\GenTools\Commands\GenAllModelsCommand;
+use LaravelCommonNew\GenTools\Commands\GenFilesCommand;
+use LaravelCommonNew\GenTools\Commands\RenameMigrationFilesCommand;
+use LaravelCommonNew\GenTools\Commands\UpdateModelsCommand;
+
 
 /**
  * @method addColumn(string $string, string $column, array $compact)
  */
 class ServiceProvider extends \Illuminate\Support\ServiceProvider
 {
-    public function register()
+    /**
+     * @return void
+     */
+    public function register(): void
     {
         // commands
         $this->commands([
-            DbBackupCommand::class,
-            DbCacheCommand::class,
-            DumpTableCommand::class,
-            GenEnumsToJSCommand::class,
+            DBCacheCommand::class,
+            DBBackupCommand::class,
+            DBDumpCommand::class,
             GenFilesCommand::class,
+            GenAllEnumsCommand::class,
+            GenAllModelsCommand::class,
             RenameMigrationFilesCommand::class,
-            UpdateModelsCommand::class
+            UpdateModelsCommand::class,
         ]);
 
         // blueprint macros
@@ -46,15 +51,16 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
         });
     }
 
-    public function boot()
+    /**
+     * @return void
+     */
+    public function boot(): void
     {
-        DBHelper::Schema();
-
         $this->publishes([
-            __DIR__ . '/resources/dist' => public_path('docs'),
-            __DIR__ . '/config/common.php' => config_path("common.php"),
+            __DIR__ . '/App/common.php' => config_path("common.php"),
+            __DIR__ . '/DocTools/docs' => public_path("docs"),
         ]);
 
-        $this->loadRoutesFrom(__DIR__ . '/routes/api.php');
+        $this->loadRoutesFrom(__DIR__ . '/DocTools/api.php');
     }
 }

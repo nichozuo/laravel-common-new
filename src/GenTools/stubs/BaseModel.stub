@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Models\Base;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations;
+use App\Models;
+
+/**
+{$properties}
+{$methods}*/
+class Base{$modelName} extends Base
+{
+    use HasFactory;
+
+    protected $table = '{$name}';
+    protected string $comment = '{$comment}';
+    protected $fillable = [{$fillable}];
+
+    {$relations}
+}

@@ -1,3 +1,0 @@
-# laravel-dev
-- hello
-- world

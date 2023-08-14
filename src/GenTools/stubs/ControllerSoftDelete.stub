@@ -1,0 +1,105 @@
+<?php
+
+
+namespace App\Modules\{$moduleName};
+
+
+use App\Models\{$modelName};
+use Illuminate\Http\Request;
+use Exception;
+
+/**
+ * @intro {$comment}
+ */
+class {$modelName}Controller extends BaseController
+{
+    /**
+     * @intro 列表
+     * @return mixed
+     * @throws Exception
+    */
+    public function list(): mixed
+    {
+        $params = request()->validate([
+            'name' => 'nullable|string', # 模糊搜索：名称
+        ]);
+        return {$modelName}::ifWhereLike($params, 'name')
+            ->order()
+            ->page();
+    }
+
+    /**
+     * @intro 添加
+     * @return void
+     */
+    public function store(): void
+    {
+        $params = request()->validate([
+            {$validateString}
+        ]);
+        {$modelName}::unique($params, ['name'], '名称');
+        {$modelName}::create($params);
+    }
+
+    /**
+     * @intro 修改
+     * @return void
+     */
+    public function update(): void
+    {
+        $params = request()->validate([
+            'id' => 'required|integer', # id
+            {$validateString}
+        ]);
+        {$modelName}::unique($params, ['name'], '名称');
+        {$modelName}::getById($params['id'])->update($params);
+    }
+
+    /**
+     * @intro 查看
+     * @return {$modelName}
+     */
+    public function show(): {$modelName}
+    {
+        $params = request()->validate([
+            'id' => 'required|integer', # id
+        ]);
+        return {$modelName}::getById($params['id']);
+    }
+
+    /**
+     * @intro 删除
+     * @return void
+     */
+    public function softDelete(): void
+    {
+        $params = request()->validate([
+            'id' => 'required|integer', # id
+        ]);
+        {$modelName}::getById($params['id'])->delete();
+    }
+
+    /**
+     * @intro 恢复软删除
+     * @return void
+     */
+    public function restore(): void
+    {
+        $params = request()->validate([
+            'id' => 'required|integer', # id
+        ]);
+        {$modelName}::withTrashed()->getById($params['id'])->restore();
+    }
+
+    /**
+     * @intro 强制删除
+     * @return void
+     */
+    public function delete(): void
+    {
+        $params = request()->validate([
+            'id' => 'required|integer', # id
+        ]);
+        {$modelName}::withTrashed()->getById($params['id'])->forceDelete();
+    }
+}
